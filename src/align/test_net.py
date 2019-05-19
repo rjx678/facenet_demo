@@ -1,0 +1,58 @@
+from scipy import misc
+import tensorflow as tf
+import align.detect_face
+import cv2
+import matplotlib.pyplot as plt
+
+minsize = 20  # minimum size of face
+threshold = [0.6, 0.7, 0.7]  # three steps's threshold
+factor = 0.709  # scale factor
+gpu_memory_fraction = 0.4
+
+#print('Creating networks and loading parameters')
+def search_face(image_path):
+    with tf.Graph().as_default():
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_memory_fraction)
+        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
+        with sess.as_default():
+            pnet, rnet, onet = align.detect_face.create_mtcnn(sess, None)
+
+    #image_path = 'C:\\Users\\rjx\\PycharmProjects\\untitled1\\facenet-master\\data\\test\\test2.jpg'
+
+    img = misc.imread(image_path)
+    bounding_boxes, _ = align.detect_face.detect_face(img, minsize, pnet, rnet, onet, threshold, factor)
+    nrof_faces = bounding_boxes.shape[0]  # 人脸数目
+    print('找到人脸数目为：{}'.format(nrof_faces))
+
+    print(bounding_boxes)
+    #return nrof_faces
+    i = 0
+    crop_faces = []
+    for face_position in bounding_boxes:
+        face_position = face_position.astype(int)
+        print(face_position[0:4])
+        cv2.rectangle(img, (face_position[0], face_position[1]), (face_position[2], face_position[3]), (0, 255, 0), 2)
+        crop = img[face_position[1]:face_position[3],
+               face_position[0]:face_position[2], ]
+
+        crop = cv2.resize(crop, (96, 96), interpolation=cv2.INTER_CUBIC)
+        print(crop.shape)
+        crop_faces.append(crop)
+        #plt.imshow(crop)
+        #plt.show()
+
+    plt.imshow(img)
+    #plt.show()
+    img_path = "C:\\Users\\rjx\\PycharmProjects\\untitled1\\facenet-master\\data\\output\\output"+str(i)+".jpg"
+    plt.savefig(img_path)
+    i = i+1
+    return nrof_faces,img_path
+
+# import numpy as np
+# import matplotlib.pyplot as plt
+# x = np.array([[1,2],[3,4],[5,6],[7,8]])
+# print(x.shape,x.size)
+# y =np.array([1,2,3,4])
+# print(y.shape,y.size)
+# plt.plot(x,y,label="xxx")
+# plt.show()
