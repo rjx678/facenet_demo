@@ -65,7 +65,6 @@ class Recognition:
 
             face.embedding = self.encoder.generate_embedding(face)
             face.name,face.prob = self.identifier.identify(face)
-            #print(i,face.name,face.prob)
         return faces
 
 """
@@ -88,7 +87,6 @@ class Identifier:
             #print(best_class_indices)
             best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
             k = 0
-            #for i in range(face.num):
             if best_class_probabilities<0.8:
                 self.class_names.append("unknown")
                 list1 = sorted(set(self.class_names), key=self.class_names.index) #去除list重复的unknown
@@ -268,9 +266,7 @@ def add_overlays(frame, faces, frame_rate):
                 cv2.putText(frame,".", (face.landmarks[4], face.landmarks[9]),
                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0, 255),
                            thickness=2, lineType=2)
-                # cv2.putText(frame, "Live?:{}".format(face.isLiveface), (100, 30),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
+                
 
     cv2.putText(frame, str(frame_rate) + " fps", (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0),
